@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector - 99.33% Accuracy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .accuracy-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.fake {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+        
+        .result.real {
+            background: #e8f5e9;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .result-label {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .result.fake .result-label {
+            color: #f44336;
+        }
+        
+        .result.real .result-label {
+            color: #4CAF50;
+        }
+        
+        .confidence {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .example-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            border-color: #667eea;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Fake News Detector</h1>
+        <p class="subtitle">
+            Powered by Bidirectional LSTM | 
+            <span class="accuracy-badge">99.33% Accuracy</span>
+        </p>
+        
+        <textarea id="newsText" placeholder="Enter news article text here..."></textarea>
+        
+        <button class="btn" onclick="analyzeNews()">Analyze News</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-label" id="resultLabel"></div>
+            <div class="confidence" id="confidence"></div>
+        </div>
+        
+        <div class="examples">
+            <h3>Try Examples:</h3>
+            <button class="example-btn" onclick="loadExample(0)">
+                Example 1: Real news about technology
+            </button>
+            <button class="example-btn" onclick="loadExample(1)">
+                Example 2: Fake news about health
+            </button>
+            <button class="example-btn" onclick="loadExample(2)">
+                Example 3: Real news about politics
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const examples = [
+            "Apple Inc. announced its quarterly earnings today, reporting a 12% increase in revenue compared to the same period last year. The company's CEO stated that strong iPhone sales and growth in services contributed to the positive results.",
+            "Scientists have discovered a miracle cure that eliminates all diseases! Just drink this special tea three times a day and you'll never get sick again. Doctors hate this one simple trick!",
+            "The President signed a new infrastructure bill into law today, allocating $1.2 trillion for roads, bridges, and broadband internet expansion across the country over the next decade."
+        ];
+        
+        function loadExample(index) {
+            document.getElementById('newsText').value = examples[index];
+        }
+        
+        async function analyzeNews() {
+            const text = document.getElementById('newsText').value;
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (text.trim().length < 20) {
+                alert('Please enter at least 20 characters for accurate prediction.');
+                return;
+            }
+            
+            // Show loading
+            resultDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                loadingDiv.style.display = 'none';
+                
+                // Show result
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (data.prediction === 'FAKE NEWS' ? 'fake' : 'real');
+                
+                document.getElementById('resultLabel').textContent = data.prediction;
+                document.getElementById('confidence').textContent = 
+                    `Confidence: ${data.confidence_percent}`;
+                
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                alert('Error analyzing news. Please try again.');
+                console.error(error);
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('newsText').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeNews();
+            }
+        });
+    </script>
+</body>
+</html>

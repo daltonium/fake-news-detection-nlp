@@ -1,0 +1,6 @@
+tensorflow>=2.13.0
+keras>=2.13.0
+numpy
+pandas
+flask
+pickle5
