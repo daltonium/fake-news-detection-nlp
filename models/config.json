@@ -1,1 +1,7 @@
-{"max_words": 5000, "max_len": 200, "accuracy": 0.9698996655518395}
+{
+    "max_words": 5000,
+    "max_len": 200,
+    "accuracy": 0.9347826086956522,
+    "f1_score": 0.9316987740805605,
+    "vocab_size": 45306
+}
