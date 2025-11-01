@@ -94,3 +94,14 @@ pred_dt = DT.predict(xv_test)
 
 print(DT.score(xv_test, y_test))
 print (classification_report(y_test, pred_lr))
+
+from sklearn.ensemble import GradientBoostingClassifier
+
+GB = GradientBoostingClassifier(random_state = 0)
+GB.fit(xv_train, y_train)
+
+pred_gb = GB.predict(xv_test)
+
+print(GB.score(xv_test, y_test))
+print(classification_report(y_test, pred_gb))
+
