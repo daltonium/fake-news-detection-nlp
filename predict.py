@@ -1,3 +1,5 @@
+# type: ignore
+
 # predict.py - Use your trained model
 
 import pickle

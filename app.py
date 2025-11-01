@@ -1,6 +1,6 @@
 # type: ignore
 
-# app.py - Simple Fake News Detector
+# app.py - Simple Fake News Detector (FIXED)
 
 from flask import Flask, render_template, request, jsonify
 import pickle
@@ -23,10 +23,15 @@ with open('models/config.json', 'r') as f:
 print("✓ Model loaded\n")
 
 def clean_text(text):
-    if pd.isna(text): return ""
+    """FIXED: Match the exact preprocessing from train.py"""
+    if pd.isna(text): 
+        return ""
     text = str(text).lower()
+    text = re.sub(r'\[.*?\]', '', text)
     text = re.sub(r'https?://\S+|www\.\S+', '', text)
+    text = re.sub(r'<.*?>', '', text)
     text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
+    text = re.sub(r'\w*\d\w*', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
