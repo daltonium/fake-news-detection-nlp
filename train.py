@@ -162,12 +162,16 @@ print("-" * 80 + "\n")
 print("Setting up callbacks...")
 print("-" * 80)
 
-early_stop = EarlyStopping(
-    monitor='val_loss',
-    patience=3,
-    restore_best_weights=True,
+# And in model.fit
+history = model.fit(
+    X_train_pad, y_train,
+    validation_split=0.2,
+    epochs=EPOCHS,
+    batch_size=BATCH_SIZE,
+    callbacks=[reduce_lr],  
     verbose=1
 )
+
 
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss',
