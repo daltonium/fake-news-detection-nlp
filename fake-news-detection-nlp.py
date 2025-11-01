@@ -19,13 +19,14 @@ true_data["class"] = 1
 
 # print(fake_data.shape, true_data.shape )
 
-fake_data_manual_testing = fake_data.tail()
+fake_data_manual_testing = fake_data.tail().copy()
 for i in range(23480, 23470, -1):
-    fake_data.drop([i], axis = 0, inplace = True)
+    fake_data.drop([i], axis=0, inplace=True)
     
-true_data_manual_testing = true_data.tail()
+true_data_manual_testing = true_data.tail().copy()
 for i in range(21416, 21406, -1):
-    true_data.drop([i], axis = 0, inplace = True)
+    true_data.drop([i], axis=0, inplace=True)
+
     
 # print(fake_data_manual_testing.shape, true_data_manual_testing.shape)
 
@@ -54,13 +55,14 @@ data.drop(['index'], axis=1, inplace=True)
 
 def wordopt(text):
     text = text.lower()
-    text = re.sub('\[.*?\]','',text)
-    text = re.sub("\\W"," ",text)
-    text = re.sub('https?://\S+|www\.\S+','',text)
-    text = re.sub('<.*?>+',b'',text)
+    text = re.sub(r'\[.*?\]','',text)           
+    text = re.sub(r"\\W"," ",text)
+    text = re.sub(r'https?://\S+|www\.\S+','',text)  
+    text = re.sub(r'<.*?>+','',text)            
     text = re.sub('[%s]' % re.escape(string.punctuation),'',text)
-    text = re.sub('\w*\d\w*','',text)
+    text = re.sub(r'\w*\d\w*','',text)          
     return text
+
 
 data['text'] = data['text'].apply(wordopt)
 
@@ -81,6 +83,7 @@ LR.fit(xv_train, y_train)
 
 pred_lr = LR.predict(xv_test)
 
+print('LogisticRegression')
 print(LR.score(xv_test, y_test))
 print (classification_report(y_test, pred_lr))
 
@@ -92,8 +95,9 @@ DT.fit(xv_train, y_train)
 
 pred_dt = DT.predict(xv_test)
 
+print('DecisionTreeClassifier')
 print(DT.score(xv_test, y_test))
-print (classification_report(y_test, pred_lr))
+print(classification_report(y_test, pred_dt))  
 
 from sklearn.ensemble import GradientBoostingClassifier
 
@@ -102,15 +106,15 @@ GB.fit(xv_train, y_train)
 
 pred_gb = GB.predict(xv_test)
 
+print('GradientBoostingClassifier')
 print(GB.score(xv_test, y_test))
 print(classification_report(y_test, pred_gb))
 
 from sklearn.ensemble import RandomForestClassifier
 
-RF = RandomForestClassifier(random_state = 0)
-
-pred_rf = RF.predict(xv_test)
-RF.fit(xv_train, y_train)
+RF = RandomForestClassifier(random_state=0)
+RF.fit(xv_train, y_train)      
+pred_rf = RF.predict(xv_test)  
 
 RF.score(xv_test, y_test)
 print (classification_report(y_test, pred_rf))
@@ -133,11 +137,11 @@ def manual_testing(news):
     pred_RF = RF.predict(new_xv_test)
     
     return print("\n\nLR Predicition: {} \nDT Prediction: {} \nGBC Prediction: {} \nRFC Prediction:{}".format(
-                                                                                                            output_lable(pred_LR[0]),
-                                                                                                             output_lable(pred_DT[0]),
-                                                                                                             output_lable(pred_GB[0])
-                                                                                                             )
-                 )
+    output_lable(pred_LR[0]),
+    output_lable(pred_DT[0]),
+    output_lable(pred_GB[0]),
+    output_lable(pred_RF[0])  
+))
 
 news = str(input()) 
 manual_testing(news)
