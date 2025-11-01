@@ -132,6 +132,9 @@ def manual_testing(news):
     pred_GB = GB.predict(new_xv_test)
     pred_RF = RF.predict(new_xv_test)
     
-    return print("\n\nLR Predicition: {} \nDT Prediction: {} \nGBC Prediction: {} \nRFC Prediction:{}".format(output_lable(pred_LR[0]),
+    return print("\n\nLR Predicition: {} \nDT Prediction: {} \nGBC Prediction: {} \nRFC Prediction:{}".format(
+                                                                                                            output_lable(pred_LR[0]),
                                                                                                              output_lable(pred_DT[0]),
-                                                                                                             output_lable(pred_GB[0])))
+                                                                                                             output_lable(pred_GB[0])
+                                                                                                             )
+                 )
