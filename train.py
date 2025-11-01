@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
 
 import tensorflow as tf
+
+# CORRECT IMPORTS FOR TensorFlow 2.20.0
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
@@ -33,7 +35,6 @@ print("="*80 + "\n")
 start_time = time.time()
 
 # ==================== CONFIGURATION ====================
-# CORRECTED: Using FULL DATASET
 DATASET_SIZE = None  # None = USE ALL DATA
 MAX_WORDS = 10000
 MAX_LEN = 500
