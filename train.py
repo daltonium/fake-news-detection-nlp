@@ -1,4 +1,4 @@
-# train.py - CORRECTED VERSION - Full Dataset Training
+# train.py - FINAL CORRECTED VERSION - Full Dataset Training (NO EARLY STOPPING)
 
 import pandas as pd
 import numpy as np
@@ -12,13 +12,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
 
 import tensorflow as tf
-
-# CORRECT IMPORTS FOR TensorFlow 2.20.0
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout, Bidirectional
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 
 # Optimize for Ryzen 5 7430U
@@ -29,7 +26,7 @@ print("\n" + "="*80)
 print("🚀 FULL DATASET TRAINING - Production Model")
 print("="*80)
 print("Dataset Size: ALL 44,000+ articles")
-print("Estimated time: 60-90 minutes on Ryzen 5 7430U")
+print("Estimated time: 100-120 minutes (10 full epochs)")
 print("="*80 + "\n")
 
 start_time = time.time()
@@ -44,7 +41,7 @@ BATCH_SIZE = 128
 print("Configuration:")
 print(f"  MAX_WORDS: {MAX_WORDS}")
 print(f"  MAX_LEN: {MAX_LEN}")
-print(f"  EPOCHS: {EPOCHS}")
+print(f"  EPOCHS: {EPOCHS} (FULL TRAINING)")
 print(f"  BATCH_SIZE: {BATCH_SIZE}\n")
 
 # ==================== LOAD DATA ====================
@@ -158,35 +155,9 @@ print("-" * 80)
 model.summary()
 print("-" * 80 + "\n")
 
-# ==================== CALLBACKS ====================
-print("Setting up callbacks...")
-print("-" * 80)
-
-# And in model.fit
-history = model.fit(
-    X_train_pad, y_train,
-    validation_split=0.2,
-    epochs=EPOCHS,
-    batch_size=BATCH_SIZE,
-    callbacks=[reduce_lr],  
-    verbose=1
-)
-
-
-reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss',
-    factor=0.5,
-    patience=2,
-    min_lr=1e-6,
-    verbose=1
-)
-
-print("✓ Early stopping enabled (patience=3)")
-print("✓ Learning rate reduction enabled\n")
-
 # ==================== TRAIN MODEL ====================
 print("="*80)
-print("TRAINING STARTED")
+print("TRAINING STARTED - FULL 10 EPOCHS (NO EARLY STOPPING)")
 print("="*80)
 print("Monitor the accuracy below. It should INCREASE over epochs.\n")
 
@@ -197,7 +168,7 @@ history = model.fit(
     validation_split=0.2,
     epochs=EPOCHS,
     batch_size=BATCH_SIZE,
-    callbacks=[early_stop, reduce_lr],
+    callbacks=[],
     verbose=1
 )
 
@@ -265,7 +236,7 @@ config = {
     'training_samples': len(X_train),
     'test_samples': len(X_test),
     'total_articles': len(data),
-    'epochs_trained': len(history.history['loss']),
+    'epochs_trained': EPOCHS,
     'training_time_minutes': float(training_time/60)
 }
 
@@ -295,11 +266,12 @@ print(f"\nTotal time: {total_time/60:.1f} minutes")
 print(f"Model accuracy: {accuracy*100:.2f}%")
 print(f"F1-Score: {f1:.4f}")
 print(f"Total articles trained on: {len(data):,}")
+print(f"Epochs completed: {EPOCHS}/10 ✓")
 
 print("\nYour production-ready model is saved in models/")
 print("\n✨ Next steps:")
 print("  1. Restart your Flask app: python app.py")
 print("  2. Test at: http://localhost:5000")
-print("  3. Upload to production!")
+print("  3. Your detector will now work correctly!")
 
 print("="*80 + "\n")
