@@ -1,0 +1,23 @@
+# Core dependencies
+pandas
+numpy
+scikit-learn
+scipy
+matplotlib
+seaborn
+
+# NLP libraries
+nltk
+textblob
+textstat
+
+# Deep Learning frameworks
+tensorflow>=2.13.0
+keras>=2.13.0
+
+# Transformers for BERT
+transformers>=4.30.0
+torch>=2.0.0
+
+# Additional utilities
+tqdm
