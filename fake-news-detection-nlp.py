@@ -105,3 +105,11 @@ pred_gb = GB.predict(xv_test)
 print(GB.score(xv_test, y_test))
 print(classification_report(y_test, pred_gb))
 
+from sklearn.ensemble import RandomForestClassifier
+
+RF = RandomForestClassifier(random_state = 0)
+
+RF.fit(xv_train, y_train)
+
+RF.score(xv_test, y_test)
+print (classification_report(y_test, pred_rf))
