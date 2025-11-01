@@ -109,6 +109,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 RF = RandomForestClassifier(random_state = 0)
 
+pred_rf = RF.predict(xv_test)
 RF.fit(xv_train, y_train)
 
 RF.score(xv_test, y_test)
