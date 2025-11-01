@@ -138,3 +138,6 @@ def manual_testing(news):
                                                                                                              output_lable(pred_GB[0])
                                                                                                              )
                  )
+
+news = str(input()) 
+manual_testing(news)
