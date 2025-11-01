@@ -62,12 +62,16 @@ y = data['class']
 # Train-test split
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
 
-# Vectorization
+# =============== Vectorization with max_features ===============
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-vectorization = TfidfVectorizer()
+# KEY CHANGE: Limit to top 5000 features to reduce memory from 43.5GB to ~1GB
+vectorization = TfidfVectorizer(max_features=5000)
 xv_train = vectorization.fit_transform(x_train)
 xv_test = vectorization.transform(x_test)
+
+print(f"Feature count reduced to: {xv_train.shape[1]} features")
+print(f"Estimated memory usage: ~{(xv_train.shape[0] * xv_train.shape[1] * 8) / (1024**3):.2f} GB\n")
 
 # =============== Logistic Regression ===============
 from sklearn.linear_model import LogisticRegression
@@ -93,27 +97,31 @@ print('\nDecisionTreeClassifier')
 print(DT.score(xv_test, y_test))
 print(classification_report(y_test, pred_dt))
 
-# =============== GradientBoosting Classifier ===============
-from sklearn.ensemble import GradientBoostingClassifier
+# =============== HistGradientBoosting Classifier ===============
+from sklearn.ensemble import HistGradientBoostingClassifier
 
-# Use standard GradientBoostingClassifier - supports sparse matrices!
-GB = GradientBoostingClassifier(random_state=0, n_estimators=50)
-GB.fit(xv_train, y_train)  # No .toarray() needed
+print('\nTraining HistGradientBoostingClassifier (this may take 1-2 minutes)...')
 
-pred_gb = GB.predict(xv_test)
+GB = HistGradientBoostingClassifier(random_state=0)
+# Now we can use .toarray() because features are reduced from 173,400 to 5,000
+GB.fit(xv_train.toarray(), y_train)
 
-print('\nGradientBoostingClassifier')
-print(GB.score(xv_test, y_test))
+pred_gb = GB.predict(xv_test.toarray())
+
+print('HistGradientBoostingClassifier')
+print(GB.score(xv_test.toarray(), y_test))
 print(classification_report(y_test, pred_gb))
 
 # =============== Random Forest Classifier ===============
 from sklearn.ensemble import RandomForestClassifier
 
+print('\nTraining RandomForestClassifier...')
+
 RF = RandomForestClassifier(random_state=0)
 RF.fit(xv_train, y_train)
 pred_rf = RF.predict(xv_test)
 
-print('\nRandomForestClassifier')
+print('RandomForestClassifier')
 print(RF.score(xv_test, y_test))
 print(classification_report(y_test, pred_rf))
 
@@ -133,7 +141,7 @@ def manual_testing(news):
     
     pred_LR = LR.predict(new_xv_test)
     pred_DT = DT.predict(new_xv_test)
-    pred_GB = GB.predict(new_xv_test)  # No .toarray()
+    pred_GB = GB.predict(new_xv_test.toarray())  # Convert to dense for HistGradientBoosting
     pred_RF = RF.predict(new_xv_test)
     
     return print("\n\nLR Predicition: {} \nDT Prediction: {} \nGBC Prediction: {} \nRFC Prediction: {}".format(
@@ -143,6 +151,9 @@ def manual_testing(news):
         output_lable(pred_RF[0])
     ))
 
-# Test the model
+# =============== Test the model ===============
+print('\n' + '='*80)
+print('MANUAL TESTING')
+print('='*80)
 news = str(input("Enter news text: "))
 manual_testing(news)
