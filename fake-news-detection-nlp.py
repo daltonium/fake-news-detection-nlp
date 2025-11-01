@@ -67,3 +67,11 @@ data['text'] = data['text'].apply(wordopt)
 x = data['text']
 y = data['class']
 
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.25)
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorization = TfidfVectorizer()
+xv_train = vectorization.fit_transform(x_train)
+xv_test = vectorization.transform(x_test)
+
