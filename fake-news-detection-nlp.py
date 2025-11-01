@@ -75,3 +75,11 @@ vectorization = TfidfVectorizer()
 xv_train = vectorization.fit_transform(x_train)
 xv_test = vectorization.transform(x_test)
 
+from sklearn.linear_model import LogisticRegression
+LR = LogisticRegression()
+LR.fit(xv_train, y_train)
+
+pred_lr = LR.predict(xv_test)
+LR.score(xv_test, y_test)
+
+print (classification_report(y_test, pred_lr))
