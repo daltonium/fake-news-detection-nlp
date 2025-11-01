@@ -27,7 +27,7 @@ true_data_manual_testing = true_data.tail()
 for i in range(21416, 21406, -1):
     true_data.drop([i], axis = 0, inplace = True)
     
-print(fake_data_manual_testing.shape, true_data_manual_testing.shape)
+# print(fake_data_manual_testing.shape, true_data_manual_testing.shape)
 
 fake_data_manual_testing["class"] = 0
 true_data_manual_testing["class"] = 1
@@ -80,6 +80,17 @@ LR = LogisticRegression()
 LR.fit(xv_train, y_train)
 
 pred_lr = LR.predict(xv_test)
-LR.score(xv_test, y_test)
 
+print(LR.score(xv_test, y_test))
+print (classification_report(y_test, pred_lr))
+
+
+from sklearn.tree import DecisionTreeClassifier
+
+DT = DecisionTreeClassifier()
+DT.fit(xv_train, y_train)
+
+pred_dt = DT.predict(xv_test)
+
+print(DT.score(xv_test, y_test))
 print (classification_report(y_test, pred_lr))
