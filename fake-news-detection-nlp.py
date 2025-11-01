@@ -114,3 +114,24 @@ RF.fit(xv_train, y_train)
 
 RF.score(xv_test, y_test)
 print (classification_report(y_test, pred_rf))
+
+def output_lable(n):
+    if n==0:
+        return "Fake News"
+    elif n==1:
+        return "Not A Fake News"
+    
+def manual_testing(news):
+    testing_news = {"text":[news]}
+    new_def_test = pd.DataFrame(testing_news)
+    new_def_test['text'] = new_def_test["text"].apply(wordopt)
+    new_x_test = new_def_test["text"]
+    new_xv_test = vectorization.transform(new_x_test)
+    pred_LR = LR.predict(new_xv_test)
+    pred_DT = DT.predict(new_xv_test)
+    pred_GB = GB.predict(new_xv_test)
+    pred_RF = RF.predict(new_xv_test)
+    
+    return print("\n\nLR Predicition: {} \nDT Prediction: {} \nGBC Prediction: {} \nRFC Prediction:{}".format(output_lable(pred_LR[0]),
+                                                                                                             output_lable(pred_DT[0]),
+                                                                                                             output_lable(pred_GB[0])))
