@@ -99,16 +99,17 @@ print('DecisionTreeClassifier')
 print(DT.score(xv_test, y_test))
 print(classification_report(y_test, pred_dt))  
 
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier
 
-GB = GradientBoostingClassifier(random_state = 0)
+GB = HistGradientBoostingClassifier(random_state=0)
 GB.fit(xv_train, y_train)
 
 pred_gb = GB.predict(xv_test)
 
-print('GradientBoostingClassifier')
+print('HistGradientBoostingClassifier')
 print(GB.score(xv_test, y_test))
 print(classification_report(y_test, pred_gb))
+
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -116,7 +117,8 @@ RF = RandomForestClassifier(random_state=0)
 RF.fit(xv_train, y_train)      
 pred_rf = RF.predict(xv_test)  
 
-RF.score(xv_test, y_test)
+print('RandomForestClassifier')
+print(RF.score(xv_test, y_test))
 print (classification_report(y_test, pred_rf))
 
 def output_lable(n):
