@@ -21,6 +21,7 @@ with open('models/config.json', 'r') as f:
 print("✓ Model loaded\n")
 
 def clean_text(text):
+    """Match preprocessing from train.py exactly"""
     if pd.isna(text): 
         return ""
     text = str(text).lower()
@@ -43,12 +44,17 @@ def predict():
     if len(text) < 20:
         return jsonify({'error': 'Please enter at least 20 characters'})
     
+    # Clean text
     cleaned = clean_text(text)
+    
+    # Tokenize and pad
     seq = tokenizer.texts_to_sequences([cleaned])
     padded = pad_sequences(seq, maxlen=config['max_len'], padding='post')
+    
+    # Get prediction score
     score = float(model.predict(padded, verbose=0)[0][0])
     
-    # STANDARD LOGIC (score > 0.5 = REAL)
+    # Standard logic: score > 0.5 = REAL (class 1)
     is_real = score > 0.5
     confidence = score if is_real else (1 - score)
     

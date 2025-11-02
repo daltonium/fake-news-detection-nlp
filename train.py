@@ -1,4 +1,4 @@
-# train.py - FINAL CORRECTED VERSION - Fixed Label Encoding
+# train.py - FINAL CORRECTED VERSION - Full Dataset Training
 
 import pandas as pd
 import numpy as np
@@ -23,7 +23,7 @@ tf.config.threading.set_intra_op_parallelism_threads(12)
 tf.config.threading.set_inter_op_parallelism_threads(6)
 
 print("\n" + "="*80)
-print("🚀 FULL DATASET TRAINING - Production Model (CORRECTED LABELS)")
+print("🚀 FULL DATASET TRAINING - Production Model")
 print("="*80)
 print("Dataset Size: ALL 44,000+ articles")
 print("Estimated time: 100-120 minutes (10 full epochs)")
@@ -55,21 +55,18 @@ print(f"✓ Fake news articles: {len(fake):,}")
 print(f"✓ Real news articles: {len(true):,}")
 print(f"✓ Total articles: {len(fake) + len(true):,}")
 
-# CORRECTED LABELS - Make sure they match app.py
-# Class 0 = FAKE NEWS
-# Class 1 = REAL NEWS
-# But we need to INVERT for model training
-fake["class"] = 1  # FAKE = 1 (high score means FAKE)
-true["class"] = 0  # REAL = 0 (low score means REAL)
+# CORRECT LABELS - Standard encoding
+fake["class"] = 0  # FAKE = 0
+true["class"] = 1  # REAL = 1
 
 print(f"\n✓ Label Encoding:")
-print(f"  - Fake news label: 1")
-print(f"  - Real news label: 0")
-print(f"  (This matches app.py logic: score < 0.5 = REAL)\n")
+print(f"  - Fake news: 0")
+print(f"  - Real news: 1")
+print(f"  - Threshold: score > 0.5 = REAL\n")
 
-fake["class"] = 0  # Changed from 1 to 0
-true["class"] = 1  # Changed from 0 to 1
-
+# Keep last samples for final validation
+fake = fake.iloc[:-10]
+true = true.iloc[:-10]
 
 # Merge and shuffle all data
 data = pd.concat([fake, true], axis=0)
@@ -245,11 +242,7 @@ config = {
     'test_samples': len(X_test),
     'total_articles': len(data),
     'epochs_trained': EPOCHS,
-    'training_time_minutes': float(training_time/60),
-    'label_encoding': {
-        'fake_news': 1,
-        'real_news': 0
-    }
+    'training_time_minutes': float(training_time/60)
 }
 
 with open('models/config.json', 'w') as f:
@@ -280,16 +273,10 @@ print(f"F1-Score: {f1:.4f}")
 print(f"Total articles trained on: {len(data):,}")
 print(f"Epochs completed: {EPOCHS}/10 ✓")
 
-print("\n📋 Label Encoding (IMPORTANT):")
-print("  - Class 1 = FAKE NEWS (score > 0.5)")
-print("  - Class 0 = REAL NEWS (score < 0.5)")
-print("\n✅ app.py uses: is_real = score < 0.5")
-
 print("\nYour production-ready model is saved in models/")
 print("\n✨ Next steps:")
-print("  1. Update app.py with flipped logic")
-print("  2. Restart Flask: python app.py")
-print("  3. Test at: http://localhost:5000")
-print("  4. Should now work correctly!")
+print("  1. Run Flask app: python app.py")
+print("  2. Test at: http://localhost:5000")
+print("  3. Should now work correctly!")
 
 print("="*80 + "\n")
