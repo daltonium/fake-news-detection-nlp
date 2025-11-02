@@ -1,4 +1,4 @@
-# app.py - Simple Fake News Detector
+# app.py - FINAL WORKING VERSION
 
 from flask import Flask, render_template, request, jsonify
 import pickle
@@ -48,6 +48,7 @@ def predict():
     padded = pad_sequences(seq, maxlen=config['max_len'], padding='post')
     score = float(model.predict(padded, verbose=0)[0][0])
     
+    # STANDARD LOGIC (score > 0.5 = REAL)
     is_real = score > 0.5
     confidence = score if is_real else (1 - score)
     
