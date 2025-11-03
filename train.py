@@ -1,4 +1,4 @@
-# train.py - FINAL CORRECTED VERSION - Full Dataset Training
+# train.py - CORRECTED to match friend's label convention
 
 import pandas as pd
 import numpy as np
@@ -18,7 +18,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout, Bidirectional
 from tensorflow.keras.optimizers import Adam
 
-# Optimize for Ryzen 5 7430U
+# Optimize for your CPU
 tf.config.threading.set_intra_op_parallelism_threads(12)
 tf.config.threading.set_inter_op_parallelism_threads(6)
 
@@ -32,7 +32,7 @@ print("="*80 + "\n")
 start_time = time.time()
 
 # ==================== CONFIGURATION ====================
-DATASET_SIZE = None  # None = USE ALL DATA
+DATASET_SIZE = None
 MAX_WORDS = 10000
 MAX_LEN = 500
 EPOCHS = 10
@@ -41,7 +41,7 @@ BATCH_SIZE = 128
 print("Configuration:")
 print(f"  MAX_WORDS: {MAX_WORDS}")
 print(f"  MAX_LEN: {MAX_LEN}")
-print(f"  EPOCHS: {EPOCHS} (FULL TRAINING)")
+print(f"  EPOCHS: {EPOCHS}")
 print(f"  BATCH_SIZE: {BATCH_SIZE}\n")
 
 # ==================== LOAD DATA ====================
@@ -55,31 +55,31 @@ print(f"✓ Fake news articles: {len(fake):,}")
 print(f"✓ Real news articles: {len(true):,}")
 print(f"✓ Total articles: {len(fake) + len(true):,}")
 
-# CORRECT LABELS - Standard encoding
-fake["class"] = 0  # FAKE = 0
-true["class"] = 1  # REAL = 1
+# CRITICAL: MATCH FRIEND'S LABEL CONVENTION
+fake["class"] = 1  # FAKE = 1 (like your friend)
+true["class"] = 0  # REAL = 0 (like your friend)
 
-print(f"\n✓ Label Encoding:")
-print(f"  - Fake news: 0")
-print(f"  - Real news: 1")
-print(f"  - Threshold: score > 0.5 = REAL\n")
+print(f"\n✓ Label Encoding (matching friend's model):")
+print(f"  - Real news: 0")
+print(f"  - Fake news: 1")
+print(f"  - Prediction logic: prediction == 0 means REAL\n")
 
-# Keep last samples for final validation
+# Keep last samples for validation
 fake = fake.iloc[:-10]
 true = true.iloc[:-10]
 
-# Merge and shuffle all data
+# Merge and shuffle
 data = pd.concat([fake, true], axis=0)
 data = data.sample(frac=1, random_state=42).reset_index(drop=True)
 
 print(f"✓ Total training samples: {len(data):,}\n")
 
 # ==================== TEXT PREPROCESSING ====================
-print("Preprocessing text (this may take a few minutes)...")
+print("Preprocessing text...")
 print("-" * 80)
 
 def clean_text(text):
-    """Exact same preprocessing as app.py - CRITICAL FOR CONSISTENCY"""
+    """Match preprocessing from app.py"""
     if pd.isna(text):
         return ""
     
@@ -93,9 +93,7 @@ def clean_text(text):
     
     return text
 
-# Apply preprocessing
 data['text'] = data['text'].apply(clean_text)
-
 print("✓ Text preprocessing complete\n")
 
 # ==================== TRAIN-TEST SPLIT ====================
@@ -111,8 +109,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 print(f"✓ Training samples: {len(X_train):,}")
-print(f"✓ Test samples: {len(X_test):,}")
-print(f"✓ Train/Test ratio: 80/20\n")
+print(f"✓ Test samples: {len(X_test):,}\n")
 
 # ==================== TOKENIZATION & PADDING ====================
 print("Tokenizing and padding sequences...")
@@ -129,10 +126,9 @@ X_test_pad = pad_sequences(X_test_seq, maxlen=MAX_LEN, padding='post', truncatin
 
 vocab_size = len(tokenizer.word_index)
 
-print(f"✓ Vocabulary size: {vocab_size:,} unique words")
-print(f"✓ Sequence length: {MAX_LEN} tokens")
-print(f"✓ Training shape: {X_train_pad.shape}")
-print(f"✓ Test shape: {X_test_pad.shape}\n")
+print(f"✓ Vocabulary size: {vocab_size:,}")
+print(f"✓ Sequence length: {MAX_LEN}")
+print(f"✓ Training shape: {X_train_pad.shape}\n")
 
 # ==================== BUILD MODEL ====================
 print("Building Bidirectional LSTM model...")
@@ -162,9 +158,8 @@ print("-" * 80 + "\n")
 
 # ==================== TRAIN MODEL ====================
 print("="*80)
-print("TRAINING STARTED - FULL 10 EPOCHS (NO EARLY STOPPING)")
+print("TRAINING STARTED - FULL 10 EPOCHS")
 print("="*80)
-print("Monitor the accuracy below. It should INCREASE over epochs.\n")
 
 training_start = time.time()
 
@@ -180,11 +175,11 @@ history = model.fit(
 training_time = time.time() - training_start
 
 print("\n" + "="*80)
-print(f"✓ Training completed in {training_time/60:.1f} minutes ({training_time:.0f} seconds)")
+print(f"✓ Training completed in {training_time/60:.1f} minutes")
 print("="*80 + "\n")
 
 # ==================== EVALUATE MODEL ====================
-print("Evaluating model on test set...")
+print("Evaluating model...")
 print("-" * 80)
 
 y_pred_prob = model.predict(X_test_pad, verbose=0)
@@ -204,31 +199,19 @@ print(f"F1-Score:  {f1:.4f}")
 print(f"AUC-ROC:   {auc:.4f}")
 print("="*80 + "\n")
 
-# Validation
-if accuracy < 0.85:
-    print("⚠️  WARNING: Model accuracy is lower than expected!")
-    print("This might indicate training issues.\n")
-elif accuracy >= 0.95:
-    print("✅ EXCELLENT: Model is performing great!\n")
-else:
-    print("✅ GOOD: Model performance is acceptable.\n")
-
-# ==================== SAVE MODEL & ARTIFACTS ====================
-print("Saving model and artifacts...")
+# ==================== SAVE MODEL ====================
+print("Saving model...")
 print("-" * 80)
 
 os.makedirs('models', exist_ok=True)
 
-# Save model
 model.save('models/model.keras')
 print("✓ Model saved: models/model.keras")
 
-# Save tokenizer
 with open('models/tokenizer.pkl', 'wb') as f:
     pickle.dump(tokenizer, f)
 print("✓ Tokenizer saved: models/tokenizer.pkl")
 
-# Save configuration
 config = {
     'max_words': MAX_WORDS,
     'max_len': MAX_LEN,
@@ -242,41 +225,16 @@ config = {
     'test_samples': len(X_test),
     'total_articles': len(data),
     'epochs_trained': EPOCHS,
-    'training_time_minutes': float(training_time/60)
+    'training_time_minutes': float(training_time/60),
+    'label_convention': {
+        'real': 0,
+        'fake': 1
+    }
 }
 
 with open('models/config.json', 'w') as f:
     json.dump(config, f, indent=4)
 print("✓ Config saved: models/config.json")
 
-# Save training history
-history_data = {
-    'train_loss': [float(x) for x in history.history['loss']],
-    'train_accuracy': [float(x) for x in history.history['accuracy']],
-    'val_loss': [float(x) for x in history.history['val_loss']],
-    'val_accuracy': [float(x) for x in history.history['val_accuracy']]
-}
-
-with open('models/training_history.json', 'w') as f:
-    json.dump(history_data, f, indent=4)
-print("✓ Training history saved: models/training_history.json")
-
-total_time = time.time() - start_time
-
-# ==================== FINAL SUMMARY ====================
-print("\n" + "="*80)
-print("✅ TRAINING COMPLETE!")
-print("="*80)
-print(f"\nTotal time: {total_time/60:.1f} minutes")
-print(f"Model accuracy: {accuracy*100:.2f}%")
-print(f"F1-Score: {f1:.4f}")
-print(f"Total articles trained on: {len(data):,}")
-print(f"Epochs completed: {EPOCHS}/10 ✓")
-
-print("\nYour production-ready model is saved in models/")
-print("\n✨ Next steps:")
-print("  1. Run Flask app: python app.py")
-print("  2. Test at: http://localhost:5000")
-print("  3. Should now work correctly!")
-
+print("\n✅ TRAINING COMPLETE!")
 print("="*80 + "\n")

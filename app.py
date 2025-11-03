@@ -1,37 +1,35 @@
-# app.py - FINAL WORKING VERSION
+# app.py - Using Friend's Logistic Regression Model
 
 from flask import Flask, render_template, request, jsonify
-import pickle
-import json
+import joblib
 import re
-import string
-import pandas as pd
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from nltk.corpus import stopwords
+import nltk
+
+# Download stopwords if not already downloaded
+try:
+    stop_words = set(stopwords.words('english'))
+except:
+    nltk.download('stopwords')
+    stop_words = set(stopwords.words('english'))
 
 app = Flask(__name__)
 
-# Load model
+# Load friend's model and vectorizer
 print("Loading model...")
-model = load_model('models/model.keras')
-with open('models/tokenizer.pkl', 'rb') as f:
-    tokenizer = pickle.load(f)
-with open('models/config.json', 'r') as f:
-    config = json.load(f)
+model = joblib.load('models/fake_news_model.pkl')
+vectorizer = joblib.load('models/tfidf_vectorizer.pkl')
 print("✓ Model loaded\n")
 
 def clean_text(text):
-    """Match preprocessing from train.py exactly"""
-    if pd.isna(text): 
-        return ""
+    """Match friend's preprocessing"""
     text = str(text).lower()
-    text = re.sub(r'\[.*?\]', '', text)
-    text = re.sub(r'https?://\S+|www\.\S+', '', text)
-    text = re.sub(r'<.*?>', '', text)
-    text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
-    text = re.sub(r'\w*\d\w*', '', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
+    text = re.sub(r'http\S+|www\S+|https\S+', '', text)
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    text = ' '.join(text.split())
+    words = text.split()
+    words = [word for word in words if word not in stop_words]
+    return ' '.join(words)
 
 @app.route('/')
 def home():
@@ -39,28 +37,29 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    # Get text from JSON request (your current frontend)
     text = request.json.get('text', '').strip()
     
     if len(text) < 20:
         return jsonify({'error': 'Please enter at least 20 characters'})
     
-    # Clean text
-    cleaned = clean_text(text)
+    # Clean and predict
+    cleaned_text = clean_text(text)
+    text_vectorized = vectorizer.transform([cleaned_text])
+    prediction = model.predict(text_vectorized)[0]
+    probability = model.predict_proba(text_vectorized)[0]
     
-    # Tokenize and pad
-    seq = tokenizer.texts_to_sequences([cleaned])
-    padded = pad_sequences(seq, maxlen=config['max_len'], padding='post')
-    
-    # Get prediction score
-    score = float(model.predict(padded, verbose=0)[0][0])
-    
-    # Standard logic: score > 0.5 = REAL (class 1)
-    is_real = score > 0.5
-    confidence = score if is_real else (1 - score)
+    # Friend's convention: 0 = REAL, 1 = FAKE
+    if prediction == 0:
+        result = "REAL NEWS ✓"
+        confidence = probability[0] * 100
+    else:
+        result = "FAKE NEWS ⚠️"
+        confidence = probability[1] * 100
     
     return jsonify({
-        'prediction': 'REAL NEWS ✓' if is_real else 'FAKE NEWS ⚠️',
-        'confidence': round(confidence * 100, 2)
+        'prediction': result,
+        'confidence': round(confidence, 2)
     })
 
 if __name__ == '__main__':
