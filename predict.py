@@ -1,7 +1,3 @@
-# type: ignore
-
-# predict.py - Use your trained model
-
 import pickle
 import json
 import re

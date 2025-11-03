@@ -1,5 +1,3 @@
-# train.py - CORRECTED to match friend's label convention
-
 import pandas as pd
 import numpy as np
 import re

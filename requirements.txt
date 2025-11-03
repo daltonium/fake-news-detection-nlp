@@ -1,32 +1,14 @@
-<<<<<<< HEAD
-tensorflow>=2.13.0
-keras>=2.13.0
-numpy
-pandas
-flask
-pickle5
-=======
 # Core dependencies
-pandas
-numpy
-scikit-learn
-scipy
-matplotlib
-seaborn
+flask>=3.0.0
+flask-cors>=4.0.0
 
-# NLP libraries
-nltk
-textblob
-textstat
+# Machine Learning (Logistic Regression - NO TENSORFLOW!)
+scikit-learn>=1.3.0
+joblib>=1.3.0
 
-# Deep Learning frameworks
-tensorflow>=2.13.0
-keras>=2.13.0
+# NLP
+nltk>=3.8.0
 
-# Transformers for BERT
-transformers>=4.30.0
-torch>=2.0.0
-
-# Additional utilities
-tqdm
->>>>>>> 457e8528bf09b38aa1ff4900717d553d88ee38f7
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0

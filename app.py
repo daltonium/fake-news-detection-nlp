@@ -1,5 +1,3 @@
-# app.py - Using Friend's Logistic Regression Model
-
 from flask import Flask, render_template, request, jsonify
 import joblib
 import re
